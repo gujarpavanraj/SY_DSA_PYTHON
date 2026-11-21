@@ -1,3 +1,4 @@
+
 class Node:
     def __init__(self, data):
         self.data = data
@@ -5,142 +6,160 @@ class Node:
         self.right = None
 
 
-class Stack:
+def InsertNode(root, value):
+    if root is None:
+        return Node(value)
+
+    if value < root.data:
+        root.left = InsertNode(root.left, value)
+    elif value > root.data:
+        root.right = InsertNode(root.right, value)
+    else:
+        print("Duplicate Value")
+
+    return root
+
+
+def CopyTree(root):
+    if root is None:
+        return None
+
+    newNode = Node(root.data)
+    newNode.left = CopyTree(root.left)
+    newNode.right = CopyTree(root.right)
+
+    return newNode
+
+
+class QueueNode:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+
+class Queue:
     def __init__(self):
-        self.stack = []
-        self.top = -1
+        self.front = None
+        self.rear = None
 
-    def push(self, node):
-        self.stack.append(node)
-        self.top = self.top + 1
+    def Enqueue(self, data):
+        newNode = QueueNode(data)
 
-    def pop(self):
-        if self.top == -1:
+        if self.rear is None:
+            self.front = newNode
+            self.rear = newNode
+        else:
+            self.rear.next = newNode
+            self.rear = newNode
+
+    def Dequeue(self):
+        if self.front is None:
             return None
 
-        node = self.stack[self.top]
-        self.stack.pop()
-        self.top = self.top - 1
-        return node
+        temp = self.front
+        self.front = self.front.next
 
-    def is_empty(self):
-        if self.top == -1:
-            return True
-        return False
+        if self.front is None:
+            self.rear = None
+
+        return temp.data
+
+    def isEmpty(self):
+        return self.front is None
 
 
-# Insert a node into BST
-def insert(root, value):
-
-    # If tree is empty
+def LevelOrder(root):
     if root is None:
-        new_node = Node(value)
-        return new_node
-
-    # Insert into left subtree
-    if value < root.data:
-        root.left = insert(root.left, value)
-
-    # Insert into right subtree
-    elif value > root.data:
-        root.right = insert(root.right, value)
-
-    # Duplicate values are not allowed
-    else:
-        print("Duplicate value not inserted.")
-
-    return root
-
-
-# Create Binary Search Tree
-def create_BST():
-
-    root = None
-
-    # Read number of nodes
-    n = int(input("Enter number of nodes: "))
-
-    # Insert all values
-    i = 0
-    while i < n:
-        value = int(input("Enter value: "))
-        root = insert(root, value)
-        i = i + 1
-
-    return root
-
-
-# Non-Recursive Inorder Traversal
-# Left -> Root -> Right
-def inorder_non_recursive(root):
-
-    if root is None:
+        print("Tree is Empty")
         return
 
-    stack = Stack()
-    current = root
+    Q = Queue()
+    Q.Enqueue(root)
 
-    while current is not None or not stack.is_empty():
-
-        # Move towards leftmost node
-        while current is not None:
-            stack.push(current)
-            current = current.left
-
-        # Visit node at top of stack
-        current = stack.pop()
+    while not Q.isEmpty():
+        current = Q.Dequeue()
         print(current.data, end=" ")
 
-        # Move to right subtree
-        current = current.right
-
-    print()
-
-
-# Non-Recursive Preorder Traversal
-# Root -> Left -> Right
-def preorder_non_recursive(root):
-
-    if root is None:
-        return
-
-    stack = Stack()
-
-    # Push root node
-    stack.push(root)
-
-    # Continue until stack becomes empty
-    while not stack.is_empty():
-
-        # Pop top node
-        current = stack.pop()
-
-        # Visit node
-        print(current.data, end=" ")
-
-        # Push right child FIRST
-        if current.right is not None:
-            stack.push(current.right)
-
-        # Push left child
         if current.left is not None:
-            stack.push(current.left)
+            Q.Enqueue(current.left)
+
+        if current.right is not None:
+            Q.Enqueue(current.right)
 
     print()
 
 
-# Main Algorithm
-def main():
+def Height(root):
+    if root is None:
+        return -1
 
-    # Create Binary Search Tree
-    root = create_BST()
+    leftHeight = Height(root.left)
+    rightHeight = Height(root.right)
 
-    print("Non-Recursive Inorder Traversal:")
-    inorder_non_recursive(root)
+    if leftHeight > rightHeight:
+        return leftHeight + 1
+    else:
+        return rightHeight + 1
 
-    print("Non-Recursive Preorder Traversal:")
-    preorder_non_recursive(root)
+
+def PrintLeafNodes(root):
+    if root is None:
+        return
+
+    if root.left is None and root.right is None:
+        print(root.data, end=" ")
+        return
+
+    PrintLeafNodes(root.left)
+    PrintLeafNodes(root.right)
 
 
-# Start program
-main()
+def Main():
+    root = None
+    copyRoot = None
+    choice = 0
+
+    while choice != 7:
+        print("\n===== Binary Search Tree Menu =====")
+        print("1. Insert Node")
+        print("2. Display Original BST (Level Order)")
+        print("3. Copy BST")
+        print("4. Display Copied BST (Level Order)")
+        print("5. Find Height of BST")
+        print("6. Print Leaf Nodes")
+        print("7. Exit")
+
+        choice = int(input("Enter your choice: "))
+
+        if choice == 1:
+            value = int(input("Enter value: "))
+            root = InsertNode(root, value)
+
+        elif choice == 2:
+            print("Original BST:")
+            LevelOrder(root)
+
+        elif choice == 3:
+            copyRoot = CopyTree(root)
+            print("BST Copied Successfully")
+
+        elif choice == 4:
+            print("Copied BST:")
+            LevelOrder(copyRoot)
+
+        elif choice == 5:
+            print("Height of BST =", Height(root))
+
+        elif choice == 6:
+            print("Leaf Nodes:")
+            PrintLeafNodes(root)
+            print()
+
+        elif choice == 7:
+            print("Program Terminated")
+
+        else:
+            print("Invalid Choice")
+
+
+Main()
